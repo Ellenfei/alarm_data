@@ -26,8 +26,8 @@ class DataServiceHandler:
                                     tf.Variable(tf.random_normal([n_hidden, n_output])),
                                     tf.Variable(tf.zeros([1, n_output]) + 0.1)])
 
-    def ping(self):
-        print('ping()')
+    # def ping(self):
+    #     print('ping()')
 
     def buildModel(self, type, datas):
         if type == BussinessType.VIDEO:
@@ -91,20 +91,20 @@ class DataServiceHandler:
             self.parametersData.append([np.mat(self.parameters[i].w1), np.mat(self.parameters[i].b1),
                                    np.mat(self.parameters[i].w2), np.mat(self.parameters[i].b2)])
             # print(sess.run(layer2, feed_dict={xs: x_data, ys: y_data}))
-            if i % 20 == 0:
+            if i % 50 == 0:
                 # print(sess.run(layer2, feed_dict={xs: x_data, ys: y_data}))
                 print(sess.run(loss, feed_dict={xs: x_data, ys: y_data}))
-                #print(parametersData)
+                # print(self.parametersData)
 
-        # print(parametersData)
         return self.parametersData
 
     # BP神经层函数
     def add_layer1(self, input, in_size, out_size, activation_function=None):
         # 权重和偏置量
-        # self.weights_one = tf.Variable(tf.random_normal([in_size, out_size]))
-        self.weights_one = self.parametersData[len(self.parametersData)-1][0]
-        self.biases_one = self.parametersData[len(self.parametersData)-1][1]
+        self.weights_one = tf.Variable(tf.random_normal([in_size, out_size]))
+        self.biases_one = tf.Variable(tf.zeros([1, out_size]) + 0.1)
+        # self.weights_one = self.parametersData[len(self.parametersData)-1][0]
+        # self.biases_one = self.parametersData[len(self.parametersData)-1][1]
         # 输出
         out = tf.matmul(input, self.weights_one) + self.biases_one
         # 激活函数
@@ -115,10 +115,10 @@ class DataServiceHandler:
         return outputs
     def add_layer2(self, input, in_size, out_size, activation_function=None):
         # 权重和偏置量
-        self.weights_two = self.parametersData[len(self.parametersData)-1][2]
-        # tf.Variable(tf.random_normal([in_size, out_size]))
-        self.biases_two = self.parametersData[len(self.parametersData)-1][3]
-        # tf.Variable(tf.zeros([1, out_size]) + 0.1)
+        # self.weights_two = self.parametersData[0][2]
+        self.weights_two = tf.Variable(tf.random_normal([in_size, out_size]))
+        # self.biases_two = self.parametersData[0][3]
+        self.biases_two = tf.Variable(tf.zeros([1, out_size]) + 0.1)
         # 输出
         out = tf.matmul(input, self.weights_two) + self.biases_two
         # 激活函数
@@ -129,47 +129,29 @@ class DataServiceHandler:
         return outputs
 
 type = 1
-# datas = [Data(nodeS=2,nodeD=13,bandwidth=12.275,delay=12.6841,loss=0.0508,flag=1),
-#          Data(nodeS=5,nodeD=10,bandwidth=14.275,delay=11.6841,loss=0.0908,flag=1),
-#          Data(nodeS=3,nodeD=10,bandwidth=14.875,delay=14.1382,loss=0.0821,flag=1),
-#          Data(nodeS=5,nodeD=10,bandwidth=15.075,delay=14.241,loss=0.0808,flag=1),
-#          Data(nodeS=1,nodeD=11,bandwidth=13.275,delay=11.6841,loss=0.0208,flag=1)]
-datas = []
-test = Utils()
-# for i in range(100):
-#     datas.append(test.generateData(True))
 
-for i in range(1000):
-    datas.append(test.generateData(True))
-    datas.append(test.generateData(False))
+datas = []
+test1 = Utils()
+
+for i in range(100):
+    datas.append(test1.generateData(True))
+    datas.append(test1.generateData(False))
 # 定义list接收数据,将数据转换为list
-'''
-listData = []
-for i in range(len(datas)):
-    listData.append([datas[i].nodeS, datas[i].nodeD, datas[i].bandwidth, datas[i].delay,
-                     datas[i].loss, datas[i].flag])
-toMatrix = np.mat(listData)
-print(toMatrix)
-x_data = toMatrix[:, 0:5]
-y_data = toMatrix[:, 5]
-print(x_data)
-print(y_data)
-'''
+
 
 test = DataServiceHandler()
 parameters = test.buildModel(type, datas)
 
-'''
-handler = DataServiceHandler()
-processor = DataService.Processor(handler)
-transport = TSocket.TServerSocket(port=9090)
-tfactory = TTransport.TBufferedTransportFactory()
-pfactory = TBinaryProtocol.TBinaryProtocolFactory()
+# handler = DataServiceHandler()
+# processor = DataService.Processor(handler)
+# transport = TSocket.TServerSocket(port=9090)
+# tfactory = TTransport.TBufferedTransportFactory()
+# pfactory = TBinaryProtocol.TBinaryProtocolFactory()
+#
+# server = TServer.TSimpleServer(processor, transport, tfactory, pfactory)
+#
+# print('Starting the server.......')
+# server.serve()
+# print('done')
 
-server = TServer.TSimpleServer(processor, transport, tfactory, pfactory)
-
-print('Starting the server.......')
-server.serve()
-print('done')
-'''
 
