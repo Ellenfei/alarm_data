@@ -16,7 +16,15 @@ from thrift.server import TServer
 
 class DataServiceHandler:
     def __init__(self):
+        n_input = 5
+        n_hidden = 6
+        n_output = 1
         self.parameters = []
+        self.parametersData = []
+        self.parametersData.append([tf.Variable(tf.random_normal([n_input, n_hidden])),
+                                    tf.Variable(tf.zeros([1, n_hidden]) + 0.1),
+                                    tf.Variable(tf.random_normal([n_hidden, n_output])),
+                                    tf.Variable(tf.zeros([1, n_output]) + 0.1)])
 
     def ping(self):
         print('ping()')
@@ -67,7 +75,12 @@ class DataServiceHandler:
         sess.run(init)
 
 
-        parametersData = []
+        # self.parametersData = []
+        # self.parametersData.append([tf.Variable(tf.random_normal([n_input, n_hidden])),
+        #                             tf.Variable(tf.zeros([1, n_hidden]) + 0.1),
+        #                             tf.Variable(tf.random_normal([n_input, n_hidden])),
+        #                             tf.Variable(tf.zeros([1, n_hidden]) + 0.1)])
+        # print(self.parametersData[len(self.parametersData-1)][0])
 
         # 8.设置迭代次数，训练模型
         for i in range(10000):
@@ -75,7 +88,7 @@ class DataServiceHandler:
             # print(sess.run(self.weights_one))
             self.parameters.append(Parameters(w1=sess.run(self.weights_one), b1=sess.run(self.biases_one),
                                               w2=sess.run(self.weights_two), b2=sess.run(self.biases_two)))
-            parametersData.append([np.mat(self.parameters[i].w1), np.mat(self.parameters[i].b1),
+            self.parametersData.append([np.mat(self.parameters[i].w1), np.mat(self.parameters[i].b1),
                                    np.mat(self.parameters[i].w2), np.mat(self.parameters[i].b2)])
             # print(sess.run(layer2, feed_dict={xs: x_data, ys: y_data}))
             if i % 20 == 0:
@@ -84,13 +97,14 @@ class DataServiceHandler:
                 #print(parametersData)
 
         # print(parametersData)
-        return parametersData
+        return self.parametersData
 
     # BP神经层函数
     def add_layer1(self, input, in_size, out_size, activation_function=None):
         # 权重和偏置量
-        self.weights_one = tf.Variable(tf.random_normal([in_size, out_size]))
-        self.biases_one = tf.Variable(tf.zeros([1, out_size]) + 0.1)
+        # self.weights_one = tf.Variable(tf.random_normal([in_size, out_size]))
+        self.weights_one = self.parametersData[len(self.parametersData)-1][0]
+        self.biases_one = self.parametersData[len(self.parametersData)-1][1]
         # 输出
         out = tf.matmul(input, self.weights_one) + self.biases_one
         # 激活函数
@@ -101,8 +115,10 @@ class DataServiceHandler:
         return outputs
     def add_layer2(self, input, in_size, out_size, activation_function=None):
         # 权重和偏置量
-        self.weights_two = tf.Variable(tf.random_normal([in_size, out_size]))
-        self.biases_two = tf.Variable(tf.zeros([1, out_size]) + 0.1)
+        self.weights_two = self.parametersData[len(self.parametersData)-1][2]
+        # tf.Variable(tf.random_normal([in_size, out_size]))
+        self.biases_two = self.parametersData[len(self.parametersData)-1][3]
+        # tf.Variable(tf.zeros([1, out_size]) + 0.1)
         # 输出
         out = tf.matmul(input, self.weights_two) + self.biases_two
         # 激活函数
